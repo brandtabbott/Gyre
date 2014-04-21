@@ -101,7 +101,7 @@ Same as above, except, JavaScript is a little different.
     </script>
 
 ## Documentation
-* [Online](https://github.com/brandtabbott/Gyre/raw/master/docs/index.html)
+* [Online](http://ecfio.co/Gyre/docs)
 
 ## Howto Generate HTML docs
 In order to generate these documents, you will need: 
@@ -111,3 +111,9 @@ In order to generate these documents, you will need:
 
 ### Execute:
     jsdoc -d docs gyre.js -t docstrap-master/template -c docstrap-master/template/jsdoc.conf.json README.md
+
+License
+-------
+
+Copyright (c) 2013 Brandt Abbott. Distributed under the MIT License. See
+LICENSE.txt for further details.    
