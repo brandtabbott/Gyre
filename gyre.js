@@ -404,9 +404,9 @@ Gyre.Messaging.PageMessage = {
   },
 
   pushAutoFadeOutMessage: function(message, selector, level){
-    this.clearMessage(selector);
+    //this.clearMessage(selector);
     var id = new Date().getTime();
-    var constructedMessage = '<div id="gyreFadingMessage'+id+'"" style="margin: 10px 100px 0px 100px; display: none" class="alert '+level+' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'+message+'</div>';
+    var constructedMessage = '<div id="gyreFadingMessage'+id+'" style="margin: 10px 100px 0px 100px; display: none" class="alert '+level+' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'+message+'</div>';
     Gyre.$(constructedMessage).prependTo(selector).fadeIn(400);
     Gyre.$('#gyreFadingMessage'+id).delay(5000).fadeOut(400).remove();
   },  
