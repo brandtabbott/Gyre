@@ -69,16 +69,6 @@
   global.Class = BaseClass;
 })(this);
 
-(function(){
-  if(window.console && console.debug){
-    var old = console.debug;
-    console.debug = function(){
-      Array.prototype.unshift.call(arguments, 'DEBUG');
-      old.apply(this, arguments);
-    }
-  } 
-})();
-
 if ('undefined' === typeof Gyre) {
   /**
   * Gyre
@@ -90,6 +80,32 @@ if ('undefined' === typeof Gyre) {
   console.clear();
   console.info('Gyre version:',Gyre.version);
 }
+
+Gyre.Logging = function(level){
+  if(typeof(level) == 'undefined' || level == null)
+    return;
+
+  if(level=='DEBUG'){
+    //Modify console logging
+    if(window.console && console.debug){
+      var old = console.debug;
+      console.debug = function(){
+        Array.prototype.unshift.call(arguments, 'DEBUG');
+        old.apply(this, arguments);
+      }
+    }
+    //Hack for IE 9 to work correctly
+    else if(window.console && !console.debug && console.log){    
+      var old = console.log;    
+      console.debug = function(){
+        Function.prototype.bind.call(old, console).apply(this, arguments);
+      }
+    } 
+  }
+  else{
+    console.debug = function(){};    
+  }
+};
 
 /**
 * Gyre.MVC
@@ -187,6 +203,39 @@ Gyre.AjaxLoader = Class.extend({
 });
 
 /**
+* AJAX Post class.
+* @class
+* @memberOf Gyre
+*/
+Gyre.AjaxPoster = Class.extend({
+  init: function() {
+    this.name="Gyre.AjaxPoster";
+  },
+
+  /**
+  * @method
+  * @memberOf Gyre.AjaxPoster#
+  * @param {string} url - url
+  * @param {string} data - json serialized form data
+  * @param {function} beforeSend - beforeSend callback
+  * @param {function} beforeSend - success callback
+  * @param {function} error - error callback
+  */
+  post: function(url, data, beforeSend, success, error){
+    return Gyre.$.ajax({
+      type: "POST",
+      dataType: "json",
+      url: url,
+      data: data,
+      cache: false,
+      beforeSend: beforeSend,
+      success: success,
+      error: error
+    });
+  } 
+});
+
+/**
 * {@link http://handlebarsjs.com Handlebars} utility class
 * @class
 * @memberOf Gyre
@@ -228,7 +277,7 @@ Gyre.Handlebars = Class.extend({
       Gyre.$(template(context)).insertBefore(Gyre.$('#'+templateId));  
     else
       Gyre.$('.'+templateId).replaceWith(template(context));
-  }
+  }  
 });
 
 /**
@@ -246,11 +295,14 @@ Gyre.MVC.Model = Class.extend({
   init: function() {
     this.name="Gyre.MVC.Model";
     this.content = null;
+    this.contentToSave = null;
     this.isLoaded = false;
     this.promise = Gyre.$.Deferred();
     this.lastURL = null;
     this.lastData = null;
     this.gyreWebSocket = null;
+    this.loadURL = null;
+    this.saveURL = null;
   },
 
   /**
@@ -334,7 +386,100 @@ Gyre.MVC.Model = Class.extend({
       this.loadModel(this.lastURL, this.lastData);
     else
       this.promise.then(function() {this.loadModel(self.lastURL, self.lastData)});
-  }
+  },
+
+  save: function() {
+    console.debug(this.name+" - saving model with data: ",this.contentToSave);
+    Gyre.Messaging.PageMessage.clearAll();
+    Gyre.Messaging.FieldMessage.clearAll();
+    return this.saveModel(this.saveURL, Gyre.$(this.contentToSave.form).serialize(), this.contentToSave.formId);
+  }, 
+
+  /**
+  * Save a model via AJAX.  Must provide a serialized form
+  * @method
+  * @memberOf Gyre.MVC.Model#
+  * @param {string} url - URL to POST to
+  * @param {string} data - serialized data to POST
+  * @param {function} beforeSend - optional callback
+  * @param {function} success - optional callback
+  * @param {function} error - optional callback
+  */
+  saveModel: function(url, postData, formId, beforeSend, success, error) {
+    var self = this;
+
+    var poster = new Gyre.AjaxPoster();
+
+    beforeSend = typeof(beforeSend)!='undefined' ? beforeSend : function(request){
+      Gyre.Messaging.PageMessage.clearAll();
+      Gyre.Messaging.FieldMessage.clearAll();      
+    };
+
+    success = typeof(success)!='undefined' ? success : function(data, textStatus, XMLHttpRequest){
+      //If there is no data returned, then display an error
+      if(typeof(data) == 'undefined' || data == null){
+        //Return to login hack
+        if(XMLHttpRequest.status == 200)
+          Gyre.Messaging.ReLoginModal.show();                        
+      }
+      //If there are errors, then display them
+      //Assume: Errors are in data.fieldErrorList
+      else if(!data.success && data.fieldErrorList){
+        Gyre.Messaging.PageMessage.pushMessage('Changes not saved.  Please see error messages below.', '.content', 'alert-danger');
+
+        //Display field error messages from the response, i.e. {fieldErrorList: {field: "foo", defaultMessage: "errorMessage"}})
+        var fieldsWithErrors = [];
+        $.each(data.fieldErrorList.reverse(), function(){    
+          if($.inArray(this.field, fieldsWithErrors) == -1){      
+            fieldsWithErrors.push(this.field);
+            Gyre.Messaging.FieldMessage.pushMessage(this.defaultMessage, Gyre.Utilities.esc('#'+formId+' [name="'+this.field+'"]'), 'error');
+          }
+        });
+      }
+      else if(!data.success && !data.fieldErrorList){
+        Gyre.Messaging.PageMessage.pushMessage('Changes not saved.  Please refresh the page and try again.', '.content', 'alert-danger');
+      }
+      else if(data.success){
+        Gyre.Messaging.PageMessage.clearAll();
+        Gyre.Messaging.PageMessage.pushAutoFadeOutMessage('Information saved.', '.content', 'alert-success');
+      }
+    };    
+
+    error = typeof(error)!='undefined' ? success : function(request, status, error){
+      //Return to login hack
+      if(request.status == 200)
+        Gyre.Messaging.ReLoginModal.show();      
+      else
+        Gyre.Messaging.PageMessage.pushMessage('Changes not saved.  Please refresh the page and try again.', '.content', 'alert-danger');              
+    };
+
+    return poster.post(url,postData,beforeSend,success,error);
+  },
+
+  /**
+  * Utilizes jQuery to delete a model via AJAX
+  * @method  
+  * @memberOf Gyre.MVC.Model#
+  * @param {string} url - url of the JSON model
+  * @param {string} data - data to pass to the request  
+  */
+  remove: function(url, data) {
+    console.debug(this.name+'.delete -','delete calling url:',url);
+    var self = this;
+
+    var loader = new Gyre.AjaxLoader();
+    self.promise = loader.loadJSON(url, data).then(function(data, textStatus, jqXHR){
+      self.content = data;
+      self.isLoaded = true;
+    }, function(jqXHR, textStatus, errorThrown) {
+      if(jqXHR.status===401){          
+        return loader.recoverFrom401(url, data).done(function(data, textStatus, jqXHR){
+          self.content = data;
+          self.isLoaded = true;
+        });
+      }         
+    });  
+  }  
 });
 
 /**
@@ -399,22 +544,48 @@ Gyre.Messaging.PageMessage = {
     this.clearMessage(selector);
 
     //This is kinda crapy, oh well
-    var constructedMessage = '<div id="gyreMessage" style="margin: 10px 100px 0px 100px; display: none" class="alert '+level+' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'+message+'</div>';
+    var constructedMessage = '<div id="gyreMessage" style="margin: 5px 100px 10px 100px; display: none" class="alert '+level+' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'+message+'</div>';
     Gyre.$(constructedMessage).prependTo(selector).fadeIn(400);
   },
 
-  pushAutoFadeOutMessage: function(message, selector, level){
-    //this.clearMessage(selector);
+  pushAutoFadeOutMessage: function(message, selector, level){    
     var id = new Date().getTime();
-    var constructedMessage = '<div id="gyreFadingMessage'+id+'" style="margin: 10px 100px 0px 100px; display: none" class="alert '+level+' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'+message+'</div>';
+    var constructedMessage = '<div id="gyreFadingMessage'+id+'" style="margin: 5px 100px 10px 100px; display: none" class="alert '+level+' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'+message+'</div>';
     Gyre.$(constructedMessage).prependTo(selector).fadeIn(400);
-    Gyre.$('#gyreFadingMessage'+id).delay(5000).fadeOut(400).remove();
+    Gyre.$('#gyreFadingMessage'+id).delay(5000).fadeOut(400).queue(function(){$(this).remove();});
   },  
 
   clearMessage: function(selector){
     if(Gyre.$(selector+' :first').attr('id')==='gyreMessage')
       Gyre.$(selector+' :first').remove();
   },
+
+  clearAll: function() {
+    Gyre.$('#gyreMessage').remove();  
+    Gyre.$('[id*=gyreFadingMessage]').remove();  
+  }
+};
+
+/**
+* @static
+* @example
+//Create a field message 'Foo'
+Gyre.Messaging.FieldMessage.pushMessage('Foo', '#myDiv', 'bg-success');
+*/
+Gyre.Messaging.FieldMessage = {
+  pushMessage: function(message, selector, level){
+    var id = new Date().getTime();
+    if($(selector).offset() != null && $(selector).offset != 'undefined'){
+      offLeft = $(selector).offset().left;      
+      div = $('<div id="gyreFieldMessage'+id+'" class="'+level+'" style="white-space:pre-wrap;">'+message+'</div>');
+      $(selector).parent().last().append(div);
+      $(selector).parent().find('div#gyreFieldMessage'+id).offset({left: offLeft, top: $(selector).parent().find('div#gyreFieldMessage'+id).offset().top});           
+    }   
+  },
+
+  clearAll: function(){    
+    Gyre.$('div[id*="gyreFieldMessage"]').remove();
+  }
 };
 
 /**
@@ -450,11 +621,32 @@ Gyre.Messaging.LoadingSpinner = {
 
 /**
 * @static
+* @example
+//Show a Modal for the user to re-login and kick them back to "/"
+Gyre.Messaging.ReLoginModal();
+*/
+Gyre.Messaging.ReLoginModal = {
+  show: function() {
+    Gyre.Messaging.Modal.show('Error: Session Expired', 'Your session has expired.  Please re-login', [
+      $('<button/>',{
+        text: 'OK', 
+        'class': 'btn btn-primary',
+        click: function() {
+          location.href="/";
+          Gyre.Messaging.Modal.hide();
+        }
+      })        
+    ]);
+  }
+};
+
+/**
+* @static
 */
 Gyre.Messaging.Modal = {
   show: function(title, body, buttons){
     Gyre.$('.modal-title').text(title);
-    Gyre.$('.modal-body').text(body);
+    Gyre.$('.modal-body').html(body);
     Gyre.$('.modal-footer').html(buttons);
     $('.modal').modal('show');
   },
@@ -515,5 +707,34 @@ Gyre.Utilities = {
       results[1] = results[1].replace(/\.json/g, "");
       return decodeURIComponent(results[1]);
     }              
-  }  
+  },
+
+  /**
+  * @static
+  * @memberOf Gyre.Utilities#
+  * @returns {string}
+  */
+  compareFormObjects: function(originalForms,modifiedForms){
+    console.debug('Comparing ',originalForms,' and ',modifiedForms);
+    var formsToSave=[];
+
+    $.each(originalForms, function(index, obj){
+      $.each(modifiedForms, function(index, modObj){      
+        if(modObj.formId == obj.formId){
+          var originalSerialized = $(obj.form).serialize();
+          var modSerialized = $(modObj.form).serialize();
+
+          if(originalSerialized != modSerialized){
+            formsToSave.push(modObj);
+          }
+        }
+      });
+    });
+
+    return formsToSave;
+  },
+
+  esc: function(str){    
+    return str.replace(/([.])/g,'\\$1');
+  }
 };
