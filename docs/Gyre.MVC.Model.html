@@ -63,6 +63,10 @@
 						</li>
 						
 						<li>
+							<a href="Gyre.AjaxPoster.html">AjaxPoster</a>
+						</li>
+						
+						<li>
 							<a href="Gyre.Handlebars.html">Handlebars</a>
 						</li>
 						
@@ -151,7 +155,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="gyre.js.html">/Users/brandt.abbott/dev/workspace/Gyre/gyre.js</a>, <a href="gyre.js.html#sunlight-1-line-245">line 245</a>
+        <a href="gyre.js.html">/Users/brandt.abbott/dev/workspace/Gyre/gyre.js</a>, <a href="gyre.js.html#sunlight-1-line-294">line 294</a>
     </li></ul></dd>
     
 
@@ -322,7 +326,7 @@ MyApp.MyModel = Gyre.MVC.Model.extend({
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="gyre.js.html">/Users/brandt.abbott/dev/workspace/Gyre/gyre.js</a>, <a href="gyre.js.html#sunlight-1-line-273">line 273</a>
+        <a href="gyre.js.html">/Users/brandt.abbott/dev/workspace/Gyre/gyre.js</a>, <a href="gyre.js.html#sunlight-1-line-325">line 325</a>
     </li></ul></dd>
     
 
@@ -463,7 +467,7 @@ MyApp.MyModel = Gyre.MVC.Model.extend({
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="gyre.js.html">/Users/brandt.abbott/dev/workspace/Gyre/gyre.js</a>, <a href="gyre.js.html#sunlight-1-line-304">line 304</a>
+        <a href="gyre.js.html">/Users/brandt.abbott/dev/workspace/Gyre/gyre.js</a>, <a href="gyre.js.html#sunlight-1-line-356">line 356</a>
     </li></ul></dd>
     
 
@@ -532,7 +536,358 @@ MyApp.MyModel = Gyre.MVC.Model.extend({
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="gyre.js.html">/Users/brandt.abbott/dev/workspace/Gyre/gyre.js</a>, <a href="gyre.js.html#sunlight-1-line-330">line 330</a>
+        <a href="gyre.js.html">/Users/brandt.abbott/dev/workspace/Gyre/gyre.js</a>, <a href="gyre.js.html#sunlight-1-line-382">line 382</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="remove"><span class="type-signature"></span>remove<span class="signature">(url, data)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Utilizes jQuery to delete a model via AJAX</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>url of the JSON model</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>data to pass to the request</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="gyre.js.html">/Users/brandt.abbott/dev/workspace/Gyre/gyre.js</a>, <a href="gyre.js.html#sunlight-1-line-466">line 466</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="saveModel"><span class="type-signature"></span>saveModel<span class="signature">(url, data, beforeSend, success, error)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Save a model via AJAX.  Must provide a serialized form</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>URL to POST to</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>serialized data to POST</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>beforeSend</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>optional callback</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>success</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>optional callback</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>error</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>optional callback</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="gyre.js.html">/Users/brandt.abbott/dev/workspace/Gyre/gyre.js</a>, <a href="gyre.js.html#sunlight-1-line-408">line 408</a>
     </li></ul></dd>
     
 
@@ -650,7 +1005,7 @@ MyApp.MyModel = Gyre.MVC.Model.extend({
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="gyre.js.html">/Users/brandt.abbott/dev/workspace/Gyre/gyre.js</a>, <a href="gyre.js.html#sunlight-1-line-262">line 262</a>
+        <a href="gyre.js.html">/Users/brandt.abbott/dev/workspace/Gyre/gyre.js</a>, <a href="gyre.js.html#sunlight-1-line-314">line 314</a>
     </li></ul></dd>
     
 
@@ -696,7 +1051,7 @@ MyApp.MyModel = Gyre.MVC.Model.extend({
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a>
-		on Mon Apr 21 2014 12:00:48 GMT-0600 (MDT) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Fri Apr 24 2015 11:25:35 GMT-0600 (MDT) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
